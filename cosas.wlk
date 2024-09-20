@@ -1,8 +1,5 @@
 object knightRider {
-	method consecuencia() {
-		
-	}
-	
+	method consecuencia() {}
 	method bulto() = 1
 	
 	method peso() = 500
@@ -89,14 +86,12 @@ object bateriaAntiaerea {
 object contenedorPortuario {
 	const cosasDentro = #{}
 	
-	method cosasDentro() {
-	return cosasDentro
-	}
-
-	method agregarCosas(cosas){
+	method cosasDentro() = cosasDentro
+	
+	method agregarCosas(cosas) {
 		cosasDentro.addAll(cosas)
 	}
-
+	
 	method consecuencia() {
 		cosasDentro.forEach({ cosa => cosa.consecuencia() })
 	}
@@ -125,18 +120,14 @@ object residuosRadioactivos {
 
 object embalajeDeSeguridad {
 	var property cosaEmbalada = null
-
+	
 	method bulto() = 2
 	
 	method consecuencia() {
 		
 	}
 	
-	method peso() {
-		return cosaEmbalada.peso()
-	}
+	method peso() = cosaEmbalada.peso()
 	
-	method nivelDePeligrosidad() {
-		return (cosaEmbalada.nivelDePeligrosidad()) / 2
-	}
+	method nivelDePeligrosidad() = cosaEmbalada.nivelDePeligrosidad() / 2
 }
