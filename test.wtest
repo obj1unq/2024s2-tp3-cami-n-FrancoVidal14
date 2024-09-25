@@ -1,0 +1,191 @@
+import camion.*
+import cosas.*
+
+describe "Tests del camion" {
+  test "todo es par" {
+    const camion1   = new Camion()
+
+    camion1.cargar(bumblebee)
+    camion1.cargar(knightRider)
+    camion1.cargar(paqueteDeLadrillos)
+    assert.that(camion1.todoPesoPar())
+  }
+  
+  test "excedido de peso" {
+    const camion1   = new Camion()
+
+    camion1.cargar(bumblebee)
+    camion1.cargar(knightRider)
+    paqueteDeLadrillos.ladrillo(601)
+    camion1.cargar(paqueteDeLadrillos)
+    assert.that(camion1.excedidoDePeso())
+  }
+  
+  test "mas peligrosos que" {
+    const camion1   = new Camion()
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+
+
+    bateriaAntiaerea.estaConMisiles(true)
+    camion1.cargar(bateriaAntiaerea)
+    camion1.cargar(residuosRadioactivos1)
+    camion1.cargar(arenaAGranel)
+    camion1.cargar(paqueteDeLadrillos)
+    assert.equals(
+      #{bateriaAntiaerea, residuosRadioactivos1},
+      camion1.objetosQueSuperanPeligrosidad(90)
+    )
+  }
+}
+
+describe "Tests de cosas" {
+  test "Contenedor portuario con cosas agregadas" {
+    contenedorPortuario.agregarCosas(
+      #{bateriaAntiaerea, bumblebee, knightRider}
+    )
+    assert.equals(
+      #{bateriaAntiaerea, bumblebee, knightRider},
+      contenedorPortuario.cosasDentro()
+    )
+  }
+  
+  test "Bumblebee envuelto como robot y como auto" {
+    const embalaje1 = new EmbalajeDeSeguridad(cosaEmbalada = bumblebee)
+
+    bumblebee.transformado(robot)
+    embalaje1.cosaEmbalada(bumblebee)
+    assert.equals(bumblebee.peso(), embalaje1.peso())
+    assert.equals(15, embalaje1.nivelDePeligrosidad())
+    
+    bumblebee.transformado(auto)
+    assert.equals(bumblebee.peso(), embalaje1.peso())
+    assert.equals(7.5, EmbalajeDeSeguridad.nivelDePeligrosidad())
+  }
+  
+  test "Consecuencias en el contenedor portuario" {
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+    const camion1   = new Camion()
+
+
+    contenedorPortuario.agregarCosas(
+      #{
+        arenaAGranel,
+        bumblebee,
+        residuosRadioactivos1,
+        bateriaAntiaerea,
+        paqueteDeLadrillos
+      }
+    )
+    residuosRadioactivos1.peso(15)
+    
+    camion1.cargar(contenedorPortuario)
+    
+    assert.equals(20, arenaAGranel.peso())
+    assert.equals(robot, bumblebee.transformado())
+    assert.equals(30, residuosRadioactivos1.peso())
+    assert.that(bateriaAntiaerea.estaConMisiles())
+    assert.equals(12, paqueteDeLadrillos.ladrillo())
+  }
+}
+
+describe "Tests de transporte" {
+  test "El camion esta excedido de peso y no puede transportar" {
+    const camion1   = new Camion()
+    const almacen1  = new Almacen(cantidadDeBultosMax = 3)
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+   
+
+    paqueteDeLadrillos.ladrillo(601)
+    camion1.cargar(paqueteDeLadrillos)
+    camion1.cargar(bateriaAntiaerea)
+    camion1.cargar(residuosRadioactivos1)
+    camion1.cargar(bumblebee)
+    camion1.cargar(knightRider)
+    assert.throwsExceptionWithMessage(
+      "El camion esta excedido de peso",
+      { camion1.transportar(almacen1, ruta9) }
+    )
+  }
+  
+  test "Transporte que no se puede hacer por falta de espacio en el almacen" {
+    const almacen1  = new Almacen(cantidadDeBultosMax = 3)
+    const camion1   = new Camion()
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+
+    
+    camion1.cargar(bateriaAntiaerea)
+    camion1.cargar(residuosRadioactivos1)
+    camion1.cargar(bumblebee)
+    almacen1.cantidadDeBultosMax(3)
+    almacen1.agregarCosa(paqueteDeLadrillos)
+    assert.throwsExceptionWithMessage(
+      "No hay espacio en el almacen",
+      { camion1.transportar(almacen1, ruta9) }
+    )
+  }
+  
+  test "Transporte no se puede hacer por caminos porque esta pesado el camion" {
+    const camion1   = new Camion()
+    const almacen1  = new Almacen(cantidadDeBultosMax = 3)
+
+    caminosVecinales.pesoMaximoSoportado(300)
+    camion1.cargar(bumblebee)
+    camion1.cargar(knightRider)
+    
+    assert.throwsExceptionWithMessage(
+      "El camino no aguanta el peso",
+      { camion1.transportar(almacen1, caminosVecinales) }
+    )
+  }
+  
+  test "Transporte no se puede hacer por nivel de peligrosidad" {
+    const camion1   = new Camion()
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+    const almacen1  = new Almacen(cantidadDeBultosMax = 3)
+    
+    camion1.cargar(residuosRadioactivos1)
+    almacen1.cantidadDeBultosMax(3)
+    assert.throwsExceptionWithMessage(
+      "No puede circular por ruta9, excede la peligrosidad",
+      { camion1.transportar(almacen1, ruta9) }
+    )
+  }
+  
+  test "Transporte correcto por caminos vecinales" {
+    const almacen1  = new Almacen(cantidadDeBultosMax = 5)
+    const camion1   = new Camion()
+    const residuosRadioactivos1 = new ResiduosRadioactivos(peso = 300) 
+
+    camion1.cargar(bateriaAntiaerea)
+    camion1.cargar(residuosRadioactivos1)
+    camion1.cargar(bumblebee)
+    caminosVecinales.pesoMaximoSoportado(2500)
+    camion1.transportar(almacen1, caminosVecinales)
+    assert.equals(
+      #{bateriaAntiaerea, residuosRadioactivos1, bumblebee},
+      almacen1.cosasDelAlmacen()
+    )
+  }
+  
+  test "Transporte correcto por ruta 9" {
+    const embalaje1 = new EmbalajeDeSeguridad(cosaEmbalada = bumblebee)
+    const embalaje2 = new EmbalajeDeSeguridad(cosaEmbalada = arenaAGranel)
+    const almacen1  = new Almacen()
+    const camion1   = new Camion()
+
+    almacen1.agregarCosa(bateriaAntiaerea)
+    almacen1.cantidadDeBultosMax(5)
+
+    
+    camion1.cargar(embalaje1)
+    camion1.cargar(embalaje2)
+    bumblebee.transformado(auto)
+    
+    camion1.transportar(almacen1, ruta9)
+    
+    assert.equals(
+      #{bateriaAntiaerea, embalaje1, embalaje2},
+      almacen1.cosasDelAlmacen()
+    )
+  }
+}
