@@ -1,6 +1,6 @@
 import cosas.*
 
-object camion {
+class Camion {
 	const property cosas = #{}
 	
 	method cargar(unaCosa) {
@@ -76,7 +76,9 @@ object camion {
 	}
 }
 
-object almacen {
+
+
+class Almacen {
 	const cosasDelAlmacen = #{}
 	var cantidadDeBultosMax = 0
 	

@@ -8,7 +8,7 @@ object knightRider {
 }
 
 object bumblebee {
-	var property transformado = null
+	var property transformado = auto
 	
 	method consecuencia() {
 		transformado = robot
@@ -106,7 +106,7 @@ object contenedorPortuario {
 	                               else 0
 }
 
-object residuosRadioactivos {
+class ResiduosRadioactivos {
 	var property peso = 0
 	
 	method consecuencia() {
@@ -118,7 +118,7 @@ object residuosRadioactivos {
 	method nivelDePeligrosidad() = 200
 }
 
-object embalajeDeSeguridad {
+class EmbalajeDeSeguridad {
 	var property cosaEmbalada = null
 	
 	method bulto() = 2
